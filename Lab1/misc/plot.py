@@ -9,7 +9,7 @@ with open("./timings.csv", "r") as ifile:
             break   
         fields = line.split(",")
         results[int(fields[0])] = float(fields[1][:-1])
-plt.plot(results.keys(), results.values())
+plt.plot(results.keys(), results.values(), ".-")
 
 plt.xscale('log')
 plt.yscale('log')
