@@ -65,6 +65,7 @@ public class Mandelbrot {
 
     private static JFrame frame;
     private static JLabel label;
+
     public static void display(BufferedImage image){
         if(frame==null){
             frame=new JFrame();
@@ -93,35 +94,50 @@ public class Mandelbrot {
         }
         return i;
     }
-    public static void main(String[] args) throws IOException {
 
-        int[] dims = {32, 64, 128, 256, 512, 1024, 2048, 4096, 8192};
+    public static double arrayMean(double[] doubleArray) {
+        double sum = 0.0;
+        for (double d : doubleArray) {
+            sum += d;
+        }
+        return sum/(double)doubleArray.length;
+    }
 
-        double xLimLeft = -2.1;
-        double xLimRight = 0.6;
-        double yLimLeft = -1.2;
-        double yLimRight = 1.2;
+    // domain limits
+    public static double xLimLeft = -2.1;
+    public static double xLimRight = 0.6;
+    public static double yLimLeft = -1.2;
+    public static double yLimRight = 1.2;
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter("./timings.csv", true));
+    // rendering params
+    public static int maxIterations = 200;
+    public static double threshold = 2.0;
 
-        BufferedImage mandelbrotBufferedImage = null;
+    //
+    public static BufferedImage mandelbrotBufferedImage = null;
 
-        int maxIterations = 200;
+    public static double mandelbrotReruns(int resolution, int rerunsNumber) {
+        double[] timings = new double[rerunsNumber];
+        if(mandelbrotBufferedImage == null) {
+            mandelbrotBufferedImage = new BufferedImage(
+                resolution, 
+                resolution, 
+                BufferedImage.TYPE_INT_ARGB
+            );
+        } else {
+            resolution = mandelbrotBufferedImage.getWidth();
+        }
+        double dx = (xLimRight-xLimLeft)/resolution;
+        double dy = (yLimRight-yLimLeft)/resolution;
 
-        for (int dim : dims) {
-            double dx = (xLimRight-xLimLeft)/dim;
-            double dy = (yLimRight-yLimLeft)/dim;
-
-            mandelbrotBufferedImage = new BufferedImage(dim, dim, BufferedImage.TYPE_INT_ARGB);
-
+        for (int i = 0; i < rerunsNumber; i++) {
             long start = System.nanoTime();
-
-            for(int n=0; n<dim; ++n) {
-                for(int m=0; m<dim; ++m) {
+            for(int n=0; n<resolution; ++n) {
+                for(int m=0; m<resolution; ++m) {
                     int breakpoint = calcMandelbrot(
                         new Complex(0, 0), 
                         new Complex(xLimLeft + dx*m, yLimLeft + dy*n),
-                        maxIterations, 2.0
+                        maxIterations, threshold
                     );
                     double hue = Math.pow(breakpoint, 1./3.)/Math.pow(maxIterations, 1./3.);
                     float brightness = 1.0f;
@@ -131,7 +147,23 @@ public class Mandelbrot {
                     mandelbrotBufferedImage.setRGB(m, n, color.getRGB());
                 }
             }
-            writer.write(dim+","+(System.nanoTime()-start)/1000000000.0+"\n");
+            long stop = System.nanoTime();
+            timings[i] = (double)(stop-start)/1000000000.0;
+        }
+        return arrayMean(timings);
+    }
+    public static void main(String[] args) throws IOException {
+
+        int[] dims = {32, 64, 128, 256, 512, 1024, 2048, 4096, 8192};
+
+        int rerunsNumber = 10;
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter("./timings.csv", false));
+        for (int dim : dims) {
+            mandelbrotBufferedImage = new BufferedImage(dim, dim, BufferedImage.TYPE_INT_ARGB);
+            double timeResult = mandelbrotReruns(dim, rerunsNumber);
+            writer.write(dim+","+timeResult+"\n");
+            writer.flush();
         }
         writer.close();
         display(mandelbrotBufferedImage);
