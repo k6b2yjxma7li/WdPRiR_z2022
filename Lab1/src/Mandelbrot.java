@@ -8,10 +8,13 @@ import javax.swing.WindowConstants;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.awt.BorderLayout;
 import java.awt.Color;
+
+import java.io.File;
 
 public class Mandelbrot {
 
@@ -92,9 +95,7 @@ public class Mandelbrot {
     }
     public static void main(String[] args) throws IOException {
 
-        // System.out.println(calcMandelbrot(new Complex(0, 0), new Complex(0.1, 0.1), 200, 2));
-        int[] dims = {512};
-        // int[] dims = {32,};
+        int[] dims = {32, 64, 128, 256, 512, 1024, 2048, 4096, 8192};
 
         double xLimLeft = -2.1;
         double xLimRight = 0.6;
@@ -105,6 +106,8 @@ public class Mandelbrot {
 
         BufferedImage mandelbrotBufferedImage = null;
 
+        int maxIterations = 200;
+
         for (int dim : dims) {
             double dx = (xLimRight-xLimLeft)/dim;
             double dy = (yLimRight-yLimLeft)/dim;
@@ -113,8 +116,6 @@ public class Mandelbrot {
 
             long start = System.nanoTime();
 
-            int maxIterations = 200;
-
             for(int n=0; n<dim; ++n) {
                 for(int m=0; m<dim; ++m) {
                     int breakpoint = calcMandelbrot(
@@ -122,8 +123,6 @@ public class Mandelbrot {
                         new Complex(xLimLeft + dx*m, yLimLeft + dy*n),
                         maxIterations, 2.0
                     );
-                    // double hue = Math.log10(breakpoint)/Math.log10(maxIterations);
-                    // double hue = Math.sqrt(breakpoint)/Math.sqrt(maxIterations);
                     double hue = Math.pow(breakpoint, 1./3.)/Math.pow(maxIterations, 1./3.);
                     float brightness = 1.0f;
                     float saturation = 1.0f;
@@ -131,17 +130,16 @@ public class Mandelbrot {
                     Color color = Color.getHSBColor(1-(float)hue, saturation, brightness);
                     mandelbrotBufferedImage.setRGB(m, n, color.getRGB());
                 }
-                // if(n % 256 == 0){
-                //     System.out.println(n+"/"+dim);
-                // }
             }
             writer.write(dim+","+(System.nanoTime()-start)/1000000000.0+"\n");
         }
         writer.close();
         display(mandelbrotBufferedImage);
 
-        // System.out.println("Mandelbrot " + dim+"x"+dim +" done");
-        // File file = new File("mandelbrot_"+maxIterations+"_"+dim+"x"+dim+".png");
-        // ImageIO.write(mandelbrotBufferedImage, "png", file);
+        int dim = dims[dims.length-1];
+
+        System.out.println("Mandelbrot generation " + dim+"x"+dim +" done");
+        File file = new File("mandelbrot_"+maxIterations+"_"+dim+"x"+dim+".png");
+        ImageIO.write(mandelbrotBufferedImage, "png", file);
     }
 }
