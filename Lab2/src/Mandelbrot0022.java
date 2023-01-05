@@ -216,7 +216,7 @@ public class Mandelbrot0022 {
 
         int rerunsNumber = 100;
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter("WdPRiR_z2022/Lab2/src/timings.csv", false));
+        BufferedWriter writer = new BufferedWriter(new FileWriter("WdPRiR_z2022/Lab2/src/timings-pools2.csv", false));
         for (int dim : dims) {
             mandelbrotBufferedImage = new BufferedImage(dim, dim, BufferedImage.TYPE_INT_ARGB);
             double timeResult = mandelbrotReruns(dim, 128, rerunsNumber);
