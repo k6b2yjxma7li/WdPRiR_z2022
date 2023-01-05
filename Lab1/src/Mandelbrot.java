@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 
-import java.io.File;
-
 public class Mandelbrot {
 
     public static class Complex {
